@@ -44,6 +44,7 @@ cc.Class({
     onLoad() {
         this.started = false;
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+          
         this.current_tail = null;
         this.current_tail_start_x = 0;
         this.current_tail_start_y = 0;
@@ -479,27 +480,28 @@ cc.Class({
     },
 
 
-
+    tran_d(){
+        // console.log('Time: ' + this.get_current_time());
+        // console.log("x: " + this.player.node.x);
+        // console.log("y: " + this.player.node.y);
+        this.space_count += 1;
+        if (!this.started) {
+            this.started = true
+            this.player.node.getComponent("player").started = true;
+        } else {
+            this.player.node.getComponent("player").direction = (this.player.node.getComponent("player").direction + 3) % 2;
+        }
+        this.current_tail = cc.instantiate(this.tail_block);
+        this.current_tail.parent = this.node;
+        this.current_tail_start_x = this.player.node.x;
+        this.current_tail_start_y = this.player.node.y;
+        this.current_tail.setPosition(this.current_tail_start_x, this.current_tail_start_y);
+    },
 
     onKeyDown: function (event) {
         switch (event.keyCode) {
             case cc.macro.KEY.space:
-                console.log('Time: ' + this.get_current_time());
-                console.log("x: " + this.player.node.x);
-                console.log("y: " + this.player.node.y);
-                this.space_count += 1;
-                if (!this.started) {
-                    this.started = true
-                    this.player.node.getComponent("player").started = true;
-                } else {
-                    this.player.node.getComponent("player").direction = (this.player.node.getComponent("player").direction + 3) % 2;
-                    console.log(this.player.node.getComponent("player").direction);
-                }
-                this.current_tail = cc.instantiate(this.tail_block);
-                this.current_tail.parent = this.node;
-                this.current_tail_start_x = this.player.node.x;
-                this.current_tail_start_y = this.player.node.y;
-                this.current_tail.setPosition(this.current_tail_start_x, this.current_tail_start_y);
+                this.tran_d()
                 break;
         }
     },

@@ -35,10 +35,18 @@ cc.Class({
 
     // LIFE-CYCLE CALLBACKS:
 
-    // onLoad () {},
+    onLoad () {
+        this.node.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+    },
 
     start () {
 
+    },
+
+
+    onMouseDown: function (event) {
+        console.log("Mouse Down");
+        this.node.parent.getComponent("game").tran_d();
     },
 
     update (dt) {
