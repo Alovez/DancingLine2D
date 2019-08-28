@@ -17,7 +17,7 @@ function Player:new(o, x, y, w, h)
     o = o or Rect:new(nil, x, y , w, h)
     setmetatable(o, self)
     self.__index = self
-    self.direction = 1
+    self.direction = 0
     return o
 end
 

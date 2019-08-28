@@ -5,18 +5,28 @@
 -- Time: 12:05
 -- To change this template use File | Settings | File Templates.
 --
-
+require 'spine-love/spine'
 local Camera = require 'Camera'
 local Player = require 'Player'
+chiro = require 'chiro'
 
 
+animation = chiro.create({
+    dir = 'powerup',
+    states = {
+        grow = {
+            loop = false
+        }
+    },
+    default = 'grow'
+})
 
 function love.load()
     -- Create a camera with a 'width' of 400 x 300 on screen at ( 32, 32 ).
     -- Because the camera has the flags 'resizable' and 'maintainAspectRatio', the default scaling will take over
     -- So everything drawn will be scaled up to maximize space within the window, with a 32 pixel buffer from each edge.
-    cam = Camera( 400, 300, { x = 32, y = 32, resizable = true, maintainAspectRatio = true } );
-    cam:setRotation(40);
+    cam = Camera( 320, 240, { x = 32, y = 32, resizable = true, maintainAspectRatio = true } );
+    cam:setRotation(math.pi / 180 * 135);
     player = Player:new(nil, 0, 0, 30, 30)
     print(debug.getmetatable(player))
 end
@@ -24,6 +34,8 @@ end
 function love.update( dt )
 --    require("lovebird").update()
     player:update();
+    print(player.y)
+    animation:update(dt)
     cam:setTranslation(player.x, player.y)
     cam:update() -- Needed to appropriately resize the camera
 
@@ -33,7 +45,9 @@ function love.draw()
     cam:push()
     -- By default, translation is half camera width, half camera height
     -- So this draws a rectangle at the center of the screen.
-    love.graphics.rectangle( 'fill', -32, -32, 64, 64 )
     player:draw()
+    animation:draw(-50, -50);
+    animation:draw(-100, -50);
+    animation:draw(-100, -150);
     cam:pop()
 end
