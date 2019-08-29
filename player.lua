@@ -18,17 +18,40 @@ function Player:new(o, x, y, w, h)
     setmetatable(o, self)
     self.__index = self
     self.direction = 0
+    self.rect_list = {}
+    self.current_rect = Rect:new(nil, x, y , w, h)
+    self.rect_list[0] = self.current_rect
     return o
 end
 
-function Player:update(x, y)
+function Player:switch()
+    if self.direction == 0 then
+        self.direction = 1
+    else
+        self.direction = 0
+    end
+
+    local new_index = table.getn(self.rect_list)
+    local new_rect = Rect:new(nil, self.x, self.y, 30, 30)
+    self.rect_list[new_index] = new_rect
+    self.current_rect = new_rect
+end
+
+function Player:update()
     if (self.direction == 0)
     then
-        self.x = self.x - 1;
-        self.width = self.width + 1;
+        self.current_rect.x = self.current_rect.x - 1;
+        self.current_rect.width = self.current_rect.width + 1;
     else
-        self.y = self.y - 1;
-        self.height = self.height + 1;
+        self.current_rect.y = self.current_rect.y - 1;
+        self.current_rect.height = self.current_rect.height + 1;
+    end
+end
+
+function Player:update_rects()
+    for k, v in pairs(self.rect_list) do
+        print(v.x)
+        v:draw()
     end
 end
 

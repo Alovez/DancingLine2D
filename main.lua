@@ -21,6 +21,16 @@ animation = chiro.create({
     default = 'grow'
 })
 
+function love.keypressed(key, scancode, isrepeat)
+    if key == "escape" then
+        love.event.quit()
+    elseif key == "space" then
+        if player then
+            player:switch()
+        end
+    end
+end
+
 function love.load()
     -- Create a camera with a 'width' of 400 x 300 on screen at ( 32, 32 ).
     -- Because the camera has the flags 'resizable' and 'maintainAspectRatio', the default scaling will take over
@@ -28,13 +38,11 @@ function love.load()
     cam = Camera( 320, 240, { x = 32, y = 32, resizable = true, maintainAspectRatio = true } );
     cam:setRotation(math.pi / 180 * 135);
     player = Player:new(nil, 0, 0, 30, 30)
-    print(debug.getmetatable(player))
 end
 
 function love.update( dt )
---    require("lovebird").update()
+    require("lovebird").update()
     player:update();
-    print(player.y)
     animation:update(dt)
     cam:setTranslation(player.x, player.y)
     cam:update() -- Needed to appropriately resize the camera
@@ -46,6 +54,7 @@ function love.draw()
     -- By default, translation is half camera width, half camera height
     -- So this draws a rectangle at the center of the screen.
     player:draw()
+    player:update_rects()
     animation:draw(-50, -50);
     animation:draw(-100, -50);
     animation:draw(-100, -150);
