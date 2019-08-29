@@ -6,8 +6,8 @@
 -- To change this template use File | Settings | File Templates.
 --
 require 'spine-love/spine'
-local Camera = require 'Camera'
-local Player = require 'Player'
+local Camera = require 'camera'
+local Player = require 'player'
 chiro = require 'chiro'
 
 
@@ -22,9 +22,14 @@ animation = chiro.create({
 })
 
 function love.keypressed(key, scancode, isrepeat)
+    print(k)
     if key == "escape" then
         love.event.quit()
     elseif key == "space" then
+        if player then
+            player:switch()
+        end
+    elseif key == "k" then
         if player then
             player:switch()
         end
@@ -32,19 +37,16 @@ function love.keypressed(key, scancode, isrepeat)
 end
 
 function love.load()
-    -- Create a camera with a 'width' of 400 x 300 on screen at ( 32, 32 ).
-    -- Because the camera has the flags 'resizable' and 'maintainAspectRatio', the default scaling will take over
-    -- So everything drawn will be scaled up to maximize space within the window, with a 32 pixel buffer from each edge.
-    cam = Camera( 320, 240, { x = 32, y = 32, resizable = true, maintainAspectRatio = true } );
+    cam = Camera( 320, 240, { x = 160, y = 120, resizable = false, maintainAspectRatio = true } );
     cam:setRotation(math.pi / 180 * 135);
     player = Player:new(nil, 0, 0, 30, 30)
 end
 
 function love.update( dt )
-    require("lovebird").update()
+--    require("lovebird").update()
     player:update();
     animation:update(dt)
-    cam:setTranslation(player.x, player.y)
+    cam:setTranslation(player.current_rect.x + 100, player.current_rect.y + 100)
     cam:update() -- Needed to appropriately resize the camera
 
 end

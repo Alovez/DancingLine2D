@@ -32,7 +32,7 @@ function Player:switch()
     end
 
     local new_index = table.getn(self.rect_list)
-    local new_rect = Rect:new(nil, self.x, self.y, 30, 30)
+    local new_rect = Rect:new(nil, self.current_rect.x, self.current_rect.y, 30, 30)
     self.rect_list[new_index] = new_rect
     self.current_rect = new_rect
 end
@@ -50,7 +50,6 @@ end
 
 function Player:update_rects()
     for k, v in pairs(self.rect_list) do
-        print(v.x)
         v:draw()
     end
 end
