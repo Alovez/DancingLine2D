@@ -22,7 +22,6 @@ animation = chiro.create({
 })
 
 function love.keypressed(key, scancode, isrepeat)
-    print(k)
     if key == "escape" then
         love.event.quit()
     elseif key == "space" then
