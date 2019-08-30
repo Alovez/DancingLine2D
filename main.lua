@@ -55,7 +55,6 @@ function love.draw()
     -- By default, translation is half camera width, half camera height
     -- So this draws a rectangle at the center of the screen.
     player:draw()
-    player:update_rects()
     animation:draw(-50, -50);
     animation:draw(-100, -50);
     animation:draw(-100, -150);

@@ -6,7 +6,7 @@
 -- To change this template use File | Settings | File Templates.
 --
 
-Rect = {x = 0, y = 0, width = 30, height = 30}
+local Rect = {x = 0, y = 0, width = 30, height = 30}
 
 function Rect:new (o, x, y, width, height)
     o = o or {}
