@@ -3,3 +3,5 @@
 temp/
 local/
 library/
+build/
+upload
