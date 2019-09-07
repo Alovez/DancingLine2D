@@ -1,10 +1,11 @@
 --
 -- Created by IntelliJ IDEA.
 -- User: A
--- Date: 2019/8/31
--- Time: 16:11
+-- Date: 2019/9/7
+-- Time: 9:56
 -- Email: ruinand@live.com
 --
+
 local path = ...
 
 local function preload(mod)
@@ -13,12 +14,4 @@ local function preload(mod)
     end
 end
 
-preload("stateswitcher")
-preload("assets")
-preload("ase")
-preload("fs")
-preload("json")
-preload("chiro")
-preload("circularbuffer")
-preload("camera")
-preload("player")
+preload("map")

@@ -5,14 +5,12 @@
 -- Time: 12:05
 -- To change this template use File | Settings | File Templates.
 --
-
+require("lib")
 require 'spine-love/spine'
 local Camera = require 'camera'
 local Player = require 'player'
 local CircularQueue = require("circularbuffer")
-local map = require("map")
-
-require("lib")
+local map = require("levels/demo_level/map")
 local assets = require("assets")
 
 local start = false

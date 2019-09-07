@@ -1,3 +1,4 @@
+require("lib")
 local chiro = require 'chiro'
 
 local map = {

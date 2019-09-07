@@ -6,6 +6,7 @@
 -- Email: ruinand@live.com
 --
 require("lib")
+require("levels")
 
 state=require("stateswitcher")
 
