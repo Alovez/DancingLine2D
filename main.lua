@@ -5,6 +5,7 @@
 -- Time: 15:52
 -- Email: ruinand@live.com
 --
+require("lib")
 
 state=require("stateswitcher")
 

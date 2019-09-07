@@ -5,11 +5,35 @@
 -- Time: 12:05
 -- To change this template use File | Settings | File Templates.
 --
+
 require 'spine-love/spine'
 local Camera = require 'camera'
 local Player = require 'player'
 local CircularQueue = require("circularbuffer")
 local map = require("map")
+
+require("lib")
+local assets = require("assets")
+
+local start = false
+local player = Player:new(nil, 0, 0, 30, 30, 80);
+local cam = Camera( 320, 240, { x = 260, y = 180, resizable = false, maintainAspectRatio = true } );
+-- init Tials CircularQueue
+local tails = CircularQueue.new(20);
+local last_time = 0;
+local bgm = 0;
+
+function love.load()
+    -- init Camera
+    cam:setRotation(math.pi / 180 * 135);
+    -- init Music
+
+    assets.load_sounds("sounds")
+    bgm = assets.sound("Mozart-mono")("static");
+    -- init global var
+    start = false;
+
+end
 
 
 function love.keypressed(key, scancode, isrepeat)
@@ -31,30 +55,17 @@ function love.keypressed(key, scancode, isrepeat)
     end
 end
 
-function love.load()
-    -- init Camera
-    cam = Camera( 320, 240, { x = 260, y = 180, resizable = false, maintainAspectRatio = true } );
-    cam:setRotation(math.pi / 180 * 135);
-    -- init Player
-    player = Player:new(nil, 0, 0, 30, 30, 80);
-    -- init Tials CircularQueue
-    tails = CircularQueue.new(20);
-    -- init Music
-    source = love.audio.newSource( "sound/Mozart-mono.mp3", "static" );
-    -- init global var
-    start = false;
-    last_time = 0;
-end
+
 
 function love.update( dt )
     if start then
-        local current_time = source:tell();
+        local current_time = bgm:tell();
         player:update(current_time - last_time);
         last_time = current_time
         cam:setTranslation(player.x, player.y)
         cam:update()
-        if not source:isPlaying() then
-            love.audio.play( source )
+        if not bgm:isPlaying() then
+            love.audio.play( bgm )
         end
         update_anims(current_time, dt)
     end
