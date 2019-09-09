@@ -10,4 +10,4 @@ require("levels")
 
 state=require("stateswitcher")
 
-state.switch("demo_level")
+state.switch("level1")

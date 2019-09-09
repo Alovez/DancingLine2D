@@ -14,4 +14,5 @@ local function preload(mod)
 end
 
 preload("demo_level")
+preload("level1")
 

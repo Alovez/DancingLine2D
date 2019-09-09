@@ -11,6 +11,7 @@ local Camera = require 'camera'
 local Player = require 'player'
 local CircularQueue = require("circularbuffer")
 local map = require("levels/demo_level/map")
+local path = require("levels/demo_level/path")
 local assets = require("assets")
 
 local start = false
@@ -18,8 +19,10 @@ local player = Player:new(nil, 0, 0, 30, 30, 80);
 local cam = Camera( 320, 240, { x = 260, y = 180, resizable = false, maintainAspectRatio = true } );
 -- init Tials CircularQueue
 local tails = CircularQueue.new(20);
+local paths = CircularQueue.new(30);
 local last_time = 0;
 local bgm = 0;
+local path_index = 30;
 
 function love.load()
     -- init Camera
@@ -30,7 +33,9 @@ function love.load()
     bgm = assets.sound("Mozart-mono")("static");
     -- init global var
     start = false;
-
+    for i=0,30,1 do
+        paths:push(path[i])
+    end
 end
 
 
@@ -82,6 +87,15 @@ function update_anims(current_time, dt)
     end
 end
 
+function update_path(current_time)
+    for k, v in ipair(path) do
+        if k > path_index and v.time > current_time then
+            path_index = path_index + 1
+            paths:push(v)
+        end
+    end
+end
+
 function darw_anims()
     local pre_it = false
     for _, value in ipairs(map)
@@ -105,12 +119,24 @@ function draw_tails()
     end
 end
 
+function draw_path()
+    local r, g, b, a = love.graphics.getColor()
+    love.graphics.getColor(160, 222, 232, 91)
+    print(table.getn(paths))
+    for p in paths:iterator() do
+        love.graphics.rectangle('fill', p.x, p.y, 50, 50)
+    end
+    love.graphics.getColor(r, g, b, a)
+end
+
+
 function love.draw()
     cam:push()
     player:draw()
     if start then
         draw_tails()
         darw_anims()
+        draw_path()
     end
     cam:pop()
 end
