@@ -14,7 +14,7 @@ local map = require("levels/level1/map")
 local assets = require("assets")
 
 
-local bgm_index = 45;
+local bgm_index = 0;
 local orbit_index = 1;
 local bgm = 0;
 local start = false
