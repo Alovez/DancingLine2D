@@ -11,27 +11,41 @@ local Camera = require 'camera'
 local orbit = require("levels/level1/orbit")
 local scene = require("levels/level1/scene")
 local map = require("levels/level1/map")
+local rhythm = require("levels/level1/rhythm")
 local assets = require("assets")
 
 
 local bgm_index = 0;
 local orbit_index = 1;
 local bgm = 0;
+local dong = 0;
 local start = false
 local cam = Camera(320, 240, { x = 0, y = 0, resizable = false, maintainAspectRatio = true });
+local life = 8
+local cambo = 0
 
-
-function love.load()
-    -- init Camera
-    -- init Music
-
-    assets.load_sounds("sounds")
-    bgm = assets.sound("level1")("static");
-    assets.load_textures("pic")
-    -- init global var
-    start = false;
+-- Event Call Back
+function hitted()
+    local current_time = bgm:tell()
+    for _, v in ipairs(rhythm) do
+        if v.status == 'idle' then
+            if current_time > v.time - v.interval and current_time < v.time + v.interval then
+                cambo = cambo + 1
+                if cambo > 2 and life < 8 then
+                    life = life + 1
+                end
+                v.status = 'success'
+                bgm:setVolume(1)
+            elseif current_time > v.time + v.interval then
+                v.status = 'false'
+                life = life - 1
+                cambo = 0
+                bgm:setVolume(0.3)
+            end
+            break
+        end
+    end
 end
-
 
 function love.keypressed(key, scancode, isrepeat)
     if key == "escape" then
@@ -40,6 +54,9 @@ function love.keypressed(key, scancode, isrepeat)
         if not start then
             start = true
         else
+            dong:stop()
+            dong:play()
+            hitted()
             print(bgm:tell())
         end
     elseif key == "rctrl" then
@@ -48,11 +65,48 @@ function love.keypressed(key, scancode, isrepeat)
     end
 end
 
-
 function love.mousepressed(x, y, button, istouch)
     if button == 1 then -- Versions prior to 0.10.0 use the MouseConstant 'l'
         local cx, cy = cam:getTranslation()
         print("x = " .. (x - 160 + cx) ..", y = " .. (y - 120 + cy))
+    end
+end
+
+-- Load
+function load_rhythm()
+    for _, v in ipairs(rhythm) do
+        v.status = "idle"
+    end
+end
+
+
+function love.load()
+    -- init Music
+    assets.load_sounds("sounds")
+    bgm = assets.sound("level1")("static");
+    dong = assets.sound("dong")("static");
+    -- init textures
+    assets.load_textures("pic")
+    -- init rhythm
+    load_rhythm()
+    -- init global var
+    start = false;
+end
+
+
+-- Update
+function update_rhythm(current_time)
+    local breaked = false
+    for _, v in ipairs(rhythm) do
+        if v.status == 'idle' and not breaked then
+            breaked = true
+            if v.time + v.interval < current_time then
+                v.status = 'false'
+                life = life - 1
+                cambo = 0
+                bgm:setVolume(life / 8)
+            end
+        end
     end
 end
 
@@ -91,6 +145,7 @@ function love.update(dt)
     if start then
         local current_time = bgm:tell();
         update_camera(current_time)
+        update_rhythm(current_time)
         if not bgm:isPlaying() then
             love.audio.play(bgm)
             bgm:seek(bgm_index)
@@ -99,8 +154,7 @@ function love.update(dt)
     end
 end
 
-
-
+-- Draw
 function draw_scene()
     local current_time = bgm:tell();
     for k, v in ipairs(scene) do
@@ -116,6 +170,8 @@ function draw_board()
     love.graphics.rectangle('fill', cx + 80, cy + 50, 320, 10)
     love.graphics.rectangle('fill', cx + 400, cy + 60, 10, 240)
     love.graphics.rectangle('fill', cx + 80, cy + 300, 320, 10)
+    love.graphics.print("Life: ".. life, cx + 80, cy + 60)
+    love.graphics.print("Cambo: ".. cambo, cx + 80, cy + 70)
 end
 
 function draw_bg()
