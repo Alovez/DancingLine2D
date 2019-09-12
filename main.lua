@@ -10,4 +10,4 @@ require("levels")
 
 state=require("stateswitcher")
 
-state.switch("level1")
+state.switch("start_page")

@@ -16,3 +16,5 @@ end
 preload("demo_level")
 preload("level1")
 preload("anim_test")
+preload("start_page")
+preload("gameover")

@@ -15,37 +15,30 @@ local orbit = {
         scale = 1
     },
     {
-        time = 34,
+        time = 38,
         x = 0,
         y = 0,
-        rotation = 0,
-        scale = 1
-    },
-    {
-        time = 40,
-        x = 320,
-        y = 0,
-        rotation = 0,
-        scale = 1
-    },
-    {
-        time = 41,
-        x = 320,
-        y = -240,
         rotation = 0,
         scale = 1
     },
     {
         time = 48,
-        x = 0,
-        y = -240,
+        x = 320,
+        y = 0,
         rotation = 0,
         scale = 1
     },
     {
-        time = 50,
-        x = 0,
-        y = -240,
+        time = 55,
+        x = 320,
+        y = 0,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 65,
+        x = 480,
+        y = 180,
         rotation = 0,
         scale = 1
     }

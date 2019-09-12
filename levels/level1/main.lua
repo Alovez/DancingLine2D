@@ -13,16 +13,21 @@ local scene = require("levels/level1/scene")
 local map = require("levels/level1/map")
 local rhythm = require("levels/level1/rhythm")
 local assets = require("assets")
+local state=require("stateswitcher")
 
-
-local bgm_index = 0;
+local bgm_index = 40;
 local orbit_index = 1;
 local bgm = 0;
 local dong = 0;
 local start = false
+local pause = false
+local gameover = false
+local pause_page = 0
+local gameover_page = 0
 local cam = Camera(320, 240, { x = 0, y = 0, resizable = false, maintainAspectRatio = true });
 local life = 8
 local cambo = 0
+local current_key = 0
 
 -- Event Call Back
 function hitted()
@@ -50,19 +55,32 @@ end
 function love.keypressed(key, scancode, isrepeat)
     if key == "escape" then
         love.event.quit()
-    elseif key == "space" or key == "k" then
+    elseif key == "j" then
+        dong:stop()
+        dong:play()
+        if gameover then
+            print("gameover")
+            state.switch("start_page")
+        end
         if not start then
             start = true
         else
---            dong:stop()
-            dong:play()
             hitted()
             print(bgm:tell())
+        end
+    elseif key == 'return' then
+        print("enter")
+        if pause then
+            pause = false
+        else
+            bgm_index = bgm:tell()
+            pause = true
         end
     elseif key == "rctrl" then
         love.audio.pause(bgm)
         debug.debug()
     end
+    current_key = key
 end
 
 function love.mousepressed(x, y, button, istouch)
@@ -87,6 +105,8 @@ function love.load()
     dong = assets.sound("dong")("static");
     -- init textures
     assets.load_textures("pic")
+    pause_page = assets.texture("bg_pause")
+    gameover_page = assets.texture("bg_gameover")
     -- init rhythm
     load_rhythm()
     -- init global var
@@ -142,7 +162,7 @@ function update_camera(current_time)
 end
 
 function love.update(dt)
-    if start then
+    if start and not pause then
         local current_time = bgm:tell();
         update_camera(current_time)
         update_rhythm(current_time)
@@ -151,7 +171,12 @@ function love.update(dt)
             bgm:seek(bgm_index)
         end
         update_anims(current_time, dt)
+    elseif pause then
+        bgm:pause()
     end
+--    if life <= 0 then
+--        gameover = true
+--    end
 end
 
 -- Draw
@@ -172,11 +197,22 @@ function draw_board()
     love.graphics.rectangle('fill', cx + 80, cy + 300, 320, 10)
     love.graphics.print("Life: ".. life, cx + 80, cy + 60)
     love.graphics.print("Cambo: ".. cambo, cx + 80, cy + 70)
+    love.graphics.print("Current Key: "..current_key, cx + 80, cy + 80)
 end
 
 function draw_bg()
     local cx, cy = cam:getTranslation()
     love.graphics.draw(assets.texture("bg"), cx - 80, cy - 60);
+end
+
+function draw_pause()
+    local cx, cy = cam:getTranslation()
+    love.graphics.draw(pause_page, cx - 80, cy - 60);
+end
+
+function draw_gameover()
+    local cx, cy = cam:getTranslation()
+    love.graphics.draw(gameover_page, cx - 80, cy - 60);
 end
 
 function darw_anims()
@@ -197,7 +233,15 @@ function love.draw()
     cam:push()
     draw_bg()
     draw_scene()
-    draw_board()
-    darw_anims()
+    if start and not pause then
+        draw_board()
+        darw_anims()
+    elseif pause then
+        draw_pause()
+    end
+    if gameover then
+        bgm:stop()
+        draw_gameover()
+    end
     cam:pop()
 end

@@ -31,6 +31,7 @@ function state.switch(state)
    -- remove info from metatable about state loaded to allow for new require of the state
    package.loaded[state]=false
    require(state)
+   love.load()
 end
 
 function state.clear()

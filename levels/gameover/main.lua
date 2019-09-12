@@ -1,5 +1,13 @@
 --
 -- Created by IntelliJ IDEA.
+-- User: ran
+-- Date: 2019-09-12
+-- Time: 22:31
+-- Email: ruinand@live.com
+--
+
+--
+-- Created by IntelliJ IDEA.
 -- User: A
 -- Date: 2019/9/12
 -- Time: 20:47
@@ -18,13 +26,13 @@ function love.keypressed(key, scancode, isrepeat)
     if key == "escape" then
         love.event.quit()
     elseif key == "j" then
-        state.switch("level1")
+        state.switch("start_page")
     end
 end
 
 function love.load()
     assets.load_textures("pic")
-    bg = assets.texture("bg_start")
+    bg = assets.texture("bg_gameover")
 end
 
 function love.draw()
