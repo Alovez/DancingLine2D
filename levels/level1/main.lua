@@ -15,7 +15,7 @@ local rhythm = require("levels/level1/rhythm")
 local assets = require("assets")
 local state=require("stateswitcher")
 
-local bgm_index = 40;
+local bgm_index = 0;
 local orbit_index = 1;
 local bgm = 0;
 local dong = 0;
@@ -183,7 +183,7 @@ end
 function draw_scene()
     local current_time = bgm:tell();
     for k, v in ipairs(scene) do
-        if v.enter < current_time and v.exit > current_time then
+        if v.enter <= current_time and v.exit > current_time then
             love.graphics.draw(v.ob, v.x, v.y, 0, v.scale_x, v.scale_y)
         end
     end

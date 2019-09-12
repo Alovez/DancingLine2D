@@ -29,18 +29,68 @@ local orbit = {
         scale = 1
     },
     {
-        time = 55,
+        time = 70,
         x = 320,
         y = 0,
         rotation = 0,
         scale = 1
     },
     {
-        time = 65,
+        time = 80,
         x = 480,
         y = 180,
         rotation = 0,
         scale = 1
-    }
+    },
+    {
+        time = 100,
+        x = 480,
+        y = 180,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 110,
+        x = 700,
+        y = 0,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 132,
+        x = 700,
+        y = 0,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 142,
+        x = 1020,
+        y = -100,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 156,
+        x = 1020,
+        y = -100,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 165,
+        x = 700,
+        y = 0,
+        rotation = 0,
+        scale = 1
+    },
+    {
+        time = 175,
+        x = 700,
+        y = -200,
+        rotation = 0,
+        scale = 1
+    },
+
 }
 return orbit

@@ -44,7 +44,31 @@ local rhythm = {
         interval = 0.3
     },
     {
-        time = 50.799690246582,
+        time = 50.917293548584,
+        interval = 0.3
+    },
+    {
+        time = 82.625,
+        interval = 0.3
+    },
+    {
+        time = 84.5833333333,
+        interval = 0.3
+    },
+    {
+        time = 112.583333333,
+        interval = 0.3
+    },
+    {
+        time = 114.541666667,
+        interval = 0.3
+    },
+    {
+        time = 144.458333333,
+        interval = 0.3
+    },
+    {
+        time = 176.5,
         interval = 0.3
     },
 }
