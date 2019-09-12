@@ -1,30 +1,31 @@
 -------------------------------------------------------------------------------
--- Spine Runtimes License Agreement
--- Last updated May 1, 2019. Replaces all prior versions.
---
--- Copyright (c) 2013-2019, Esoteric Software LLC
---
--- Integration of the Spine Runtimes into software or otherwise creating
--- derivative works of the Spine Runtimes is permitted under the terms and
--- conditions of Section 2 of the Spine Editor License Agreement:
--- http://esotericsoftware.com/spine-editor-license
---
--- Otherwise, it is permitted to integrate the Spine Runtimes into software
--- or otherwise create derivative works of the Spine Runtimes (collectively,
--- "Products"), provided that each user of the Products must obtain their own
--- Spine Editor license and redistribution of the Products in any form must
--- include this license and copyright notice.
---
--- THIS SOFTWARE IS PROVIDED BY ESOTERIC SOFTWARE LLC "AS IS" AND ANY EXPRESS
--- OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
--- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
--- NO EVENT SHALL ESOTERIC SOFTWARE LLC BE LIABLE FOR ANY DIRECT, INDIRECT,
--- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
--- BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS
--- INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY
--- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
--- NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
--- EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-- Spine Runtimes Software License v2.5
+-- 
+-- Copyright (c) 2013-2016, Esoteric Software
+-- All rights reserved.
+-- 
+-- You are granted a perpetual, non-exclusive, non-sublicensable, and
+-- non-transferable license to use, install, execute, and perform the Spine
+-- Runtimes software and derivative works solely for personal or internal
+-- use. Without the written permission of Esoteric Software (see Section 2 of
+-- the Spine Software License Agreement), you may not (a) modify, translate,
+-- adapt, or develop new applications using the Spine Runtimes or otherwise
+-- create derivative works or improvements of the Spine Runtimes or (b) remove,
+-- delete, alter, or obscure any trademarks or any copyright, trademark, patent,
+-- or other intellectual property or proprietary rights notices on or in the
+-- Software, including any copy thereof. Redistributions in binary or source
+-- form must include this license and terms.
+-- 
+-- THIS SOFTWARE IS PROVIDED BY ESOTERIC SOFTWARE "AS IS" AND ANY EXPRESS OR
+-- IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+-- EVENT SHALL ESOTERIC SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-- SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+-- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS INTERRUPTION, OR LOSS OF
+-- USE, DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+-- IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+-- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+-- POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -34,7 +35,6 @@ local math_sqrt = math.sqrt
 local math_acos = math.acos
 local math_sin = math.sin
 local math_cos = math.cos
-local math_min = math.min
 local table_insert = table.insert
 local math_deg = math.deg
 local math_rad = math.rad
@@ -52,16 +52,13 @@ function IkConstraint.new (data, skeleton)
 		bones = {},
 		target = nil,
 		mix = data.mix,
-		softness = data.softness,
-		compress = data.compress,
-		stretch = data.stretch,
 		bendDirection = data.bendDirection,
-		active = false
+		level = 0
 	}
 	setmetatable(self, IkConstraint)
 
 	local self_bones = self.bones
-	for _,boneData in ipairs(data.bones) do
+	for i,boneData in ipairs(data.bones) do
 		table_insert(self_bones, skeleton:findBone(boneData.name))
 	end
 	self.target = skeleton:findBone(data.target.name)
@@ -77,55 +74,40 @@ function IkConstraint:update ()
 	local target = self.target
 	local bones = self.bones
 	local boneCount = #bones
-	if boneCount == 1 then
-		self:apply1(bones[1], target.worldX, target.worldY, self.compress, self.stretch, self.data.uniform, self.mix)
-	elseif boneCount == 2 then
-		self:apply2(bones[1], bones[2], target.worldX, target.worldY, self.bendDirection, self.stretch, self.softness, self.mix)
+	if boneCount == 1 then 
+		self:apply1(bones[1], target.worldX, target.worldY, self.mix)
+	elseif boneCount == 2 then 
+		self:apply2(bones[1], bones[2], target.worldX, target.worldY, self.bendDirection, self.mix)
 	end
 end
 
-function IkConstraint:apply1 (bone, targetX, targetY, compress, stretch, uniform, alpha)
-	if not bone.appliedValid then bone:updateAppliedTransform() end
-	local p = bone.parent
-	local id = 1 / (p.a * p.d - p.b * p.c)
-	local x = targetX - p.worldX
-	local y = targetY - p.worldY
-	local tx = (x * p.d - y * p.b) * id - bone.ax
-	local ty = (y * p.a - x * p.c) * id - bone.ay
-	local rotationIK = math_deg(math_atan2(ty, tx)) - bone.ashearX - bone.arotation
-	if bone.ascaleX < 0 then rotationIK = rotationIK + 180 end
+function IkConstraint:apply1 (bone, targetX, targetY, alpha)
+	local pp = bone.parent
+	local id = 1 / (pp.a * pp.d - pp.b * pp.c)
+	local x = targetX - pp.worldX
+	local y = targetY - pp.worldY
+	local tx = (x * pp.d - y * pp.b) * id - bone.x
+	local ty = (y * pp.a - x * pp.c) * id - bone.y
+	local rotationIK = math_deg(math_atan2(ty, tx)) - bone.shearX - bone.rotation
+	if bone.scaleX < 0 then rotationIK = rotationIK + 180 end
 	if rotationIK > 180 then
 		rotationIK = rotationIK - 360
-	elseif (rotationIK < -180) then
+	elseif (rotationIK < -180) then 
 		rotationIK = rotationIK + 360
 	end
-	local sx = bone.ascaleX
-	local sy = bone.ascaleY
-	if compress or stretch then
-		local b = bone.data.length * sx
-		local dd = math_sqrt(tx * tx + ty * ty)
-		if (compress and dd < b) or (stretch and dd > b) and b > 0.0001 then
-			local s = (dd / b - 1) * alpha + 1
-			sx = sx * s
-			if uniform then sy = sy * s end
-		end
-	end
-	bone:updateWorldTransformWith(bone.ax, bone.ay, bone.arotation + rotationIK * alpha, sx, sy, bone.ashearX, bone.ashearY)
+	bone:updateWorldTransformWith(bone.x, bone.y, bone.rotation + rotationIK * alpha, bone.scaleX, bone.scaleY, bone.shearX, bone.shearY)
 end
 
-function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch, softness, alpha)
+function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, alpha)
 	if alpha == 0 then
 		child:updateWorldTransform()
 		return
 	end
-	if not parent.appliedValid then parent:updateAppliedTransform() end
-	if not child.appliedValid then child:updateAppliedTransform() end
-	local px = parent.ax
-	local py = parent.ay
-	local psx = parent.ascaleX
-	local sx = psx
-	local psy = parent.ascaleY
-	local csx = child.ascaleX
+	local px = parent.x
+	local py = parent.y
+	local psx = parent.scaleX
+	local psy = parent.scaleY
+	local csx = child.scaleX
 	local os1 = 0
 	local os2 = 0
 	local s2 = 0
@@ -147,7 +129,7 @@ function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch,
 	else
 		os2 = 0
 	end
-	local cx = child.ax
+	local cx = child.x
 	local cy = 0
 	local cwx = 0
 	local cwy = 0
@@ -161,7 +143,7 @@ function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch,
 		cwx = a * cx + parent.worldX
 		cwy = c * cx + parent.worldY
 	else
-		cy = child.ay
+		cy = child.y
 		cwx = a * cx + b * cy + parent.worldX
 		cwy = c * cx + d * cy + parent.worldY
 	end
@@ -171,45 +153,26 @@ function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch,
 	c = pp.c
 	d = pp.d
 	local id = 1 / (a * d - b * c)
-	local x = cwx - pp.worldX
-	local y = cwy - pp.worldY
+	local x = targetX - pp.worldX 
+	local y = targetY - pp.worldY
+	local tx = (x * d - y * b) * id - px
+	local ty = (y * a - x * c) * id - py
+	x = cwx - pp.worldX
+	y = cwy - pp.worldY
 	local dx = (x * d - y * b) * id - px
 	local dy = (y * a - x * c) * id - py
 	local l1 = math_sqrt(dx * dx + dy * dy)
 	local l2 = child.data.length * csx
 	local a1 = 0
 	local a2 = 0
-	if l1 < 0.0001 then
-		self:apply1(parent, targetX, targetY, false, stretch, false, alpha)
-		child:updateWorldTransformWith(cx, cy, 0, child.ascaleX, child.ascaleY, child.ashearX, child.ashearY)
-		return
-	end
-	x = targetX - pp.worldX
-	y = targetY - pp.worldY
-	local tx = (x * d - y * b) * id - px
-	local ty = (y * a - x * c) * id - py
-	local dd = tx * tx + ty * ty
-	if softness ~= 0 then
-		softness = softness * (psx * (csx + 1) / 2)
-		local td = math_sqrt(dd)
-		local sd = td - l1 - l2 * psx + softness
-		if sd > 0 then
-			local p = math_min(1, sd / (softness * 2)) - 1
-			p = (sd - softness * (1 - p * p)) / td
-			tx = tx - p * tx
-			ty = ty - p * ty
-			dd = tx * tx + ty * ty
-		end
-	end
-
+	
 	if u then
 		l2 = l2 * psx
-		local cos = (dd - l1 * l1 - l2 * l2) / (2 * l1 * l2)
+		local cos = (tx * tx + ty * ty - l1 * l1 - l2 * l2) / (2 * l1 * l2)
 		if cos < -1 then
 			cos = -1
 		elseif cos > 1 then
 			cos = 1
-			if stretch then sx = sx * ((math_sqrt(dd) / (l1 + l2) - 1) * alpha + 1) end
 		end
 		a2 = math_acos(cos) * bendDir
 		a = l1 + l2 * cos
@@ -221,6 +184,7 @@ function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch,
 		b = psy * l2
 		local aa = a * a
 		local bb = b * b
+		local dd = tx * tx + ty * ty
 		local ta = math_atan2(ty, tx);
 		c = bb * l1 * l1 + aa * dd - aa * bb
 		local c1 = -2 * bb * l1
@@ -242,32 +206,43 @@ function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch,
 			end
 		end
 		if not skip then
-			local minAngle = math_pi
-			local minX = l1 - a
-			local minDist = minX * minX
-			local minY = 0;
+			local minAngle = 0
+			local minDist = 9999999999
+			local minX = 0
+			local minY = 0
 			local maxAngle = 0
-			local maxX = l1 + a
-			local maxDist = maxX * maxX
+			local maxDist = 0
+			local maxX = 0
 			local maxY = 0
-			c = -a * l1 / (aa - bb)
-			if (c >= -1 and c <= 1) then
-				c = math_acos(c)
-				x = a * math_cos(c) + l1
-				y = b * math_sin(c)
-				d = x * x + y * y
-				if d < minDist then
-					minAngle = c
-					minDist = d
-					minX = x
-					minY = y
-				end
-				if d > maxDist then
-					maxAngle = c
-					maxDist = d
-					maxX = x
-					maxY = y
-				end
+			x = l1 + a
+			d = x * x
+			if d > maxDist then
+				maxAngle = 0
+				maxDist = d
+				maxX = x
+			end
+			x = l1 - a
+			d = x * x
+			if d < minDist then
+				minAngle = math_pi
+				minDist = d
+				minX = x
+			end
+			local angle = math_acos(-a * l1 / (aa - bb))
+			x = a * math_cos(angle) + l1
+			y = b * math_sin(angle)
+			d = x * x + y * y
+			if d < minDist then
+				minAngle = angle
+				minDist = d
+				minX = x
+				minY = y
+			end
+			if d > maxDist then
+				maxAngle = angle
+				maxDist = d
+				maxX = x
+				maxY = y
 			end
 			if dd <= (minDist + maxDist) / 2 then
 				a1 = ta - math_atan2(minY * bendDir, minX)
@@ -279,22 +254,22 @@ function IkConstraint:apply2 (parent, child, targetX, targetY, bendDir, stretch,
 		end
 	end
 	local os = math_atan2(cy, cx) * s2
-	local rotation = parent.arotation
+	local rotation = parent.rotation
 	a1 = math_deg(a1 - os) + os1 - rotation
 	if a1 > 180 then
 		a1 = a1 - 360
 	elseif a1 < -180 then
 		a1 = a1 + 360
 	end
-	parent:updateWorldTransformWith(px, py, rotation + a1 * alpha, sx, parent.ascaleY, 0, 0)
+	parent:updateWorldTransformWith(px, py, rotation + a1 * alpha, parent.scaleX, parent.scaleY, 0, 0)
 	rotation = child.rotation
-	a2 = (math_deg(a2 + os) - child.ashearX) * s2 + os2 - rotation
+	a2 = (math_deg(a2 + os) - child.shearX) * s2 + os2 - rotation
 	if a2 > 180 then
 		a2 = a2 - 360
 	elseif a2 < -180 then
 		a2 = a2 + 360
 	end
-	child:updateWorldTransformWith(cx, cy, rotation + a2 * alpha, child.ascaleX, child.ascaleY, child.ashearX, child.ashearY);
+	child:updateWorldTransformWith(cx, cy, rotation + a2 * alpha, child.scaleX, child.scaleY, child.shearX, child.shearY);	
 end
 
 return IkConstraint

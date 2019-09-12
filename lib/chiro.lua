@@ -13,7 +13,8 @@ function chiro.create(config)
   local loader = function (path) return love.graphics.newImage(self.dir .. '/' .. path) end
   local atlas = spine.TextureAtlas.new(spine.utils.readFile(self.dir .. '/' .. name .. ".atlas"), loader)
 
-  self.skeletonJson = spine.SkeletonJson.new(spine.AtlasAttachmentLoader.new(atlas))
+  print("tttttt")
+  self.skeletonJson = spine.SkeletonJson.new(spine.TextureAtlasAttachmentLoader.new(atlas))
   self.skeletonJson.scale = self.scale or 1
 
   if type(self.json) == 'table' then
@@ -35,23 +36,23 @@ function chiro.create(config)
 
   self.on = self.on or {}
 
-  self.animationState.onStart = function(entry)
-    local name = entry.animation.name
+  self.animationState.onStart = function(trackIndex)
+    local name = self.animationState:getCurrent(trackIndex).animation.name
     local state = self.states[name]
     if state and self.on.start then
       self.on.start(self, state)
     end
   end
 
-  self.animationState.onEvent = function(_, event)
-    local name = event.data.name
+  self.animationState.onEvent = function(trackIndex, event)
+    local name = self.animationState:getCurrent(trackIndex).animation.name
     if self.on[name] then
       self.on[name](self, event)
     end
   end
 
-  self.animationState.onEnd = function(entry)
-    local name = entry.animation.name
+  self.animationState.onEnd = function(trackIndex)
+    local name = self.animationState:getCurrent(trackIndex).animation.name
     local state = self.states[name]
     if state then
       if self.on['end'] then
@@ -64,8 +65,8 @@ function chiro.create(config)
     end
   end
 
-  self.animationState.onComplete = function(entry)
-    local name = entry.animation.name
+  self.animationState.onComplete = function(trackIndex, loopCount)
+    local name = self.animationState:getCurrent(trackIndex).animation.name
     local state = self.states[name]
     if state and self.on.complete then
       self.on.complete(self, state)

@@ -54,7 +54,7 @@ function love.keypressed(key, scancode, isrepeat)
         if not start then
             start = true
         else
-            dong:stop()
+--            dong:stop()
             dong:play()
             hitted()
             print(bgm:tell())

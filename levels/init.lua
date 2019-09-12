@@ -15,4 +15,4 @@ end
 
 preload("demo_level")
 preload("level1")
-
+preload("anim_test")

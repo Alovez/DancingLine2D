@@ -1,30 +1,31 @@
 -------------------------------------------------------------------------------
--- Spine Runtimes License Agreement
--- Last updated May 1, 2019. Replaces all prior versions.
---
--- Copyright (c) 2013-2019, Esoteric Software LLC
---
--- Integration of the Spine Runtimes into software or otherwise creating
--- derivative works of the Spine Runtimes is permitted under the terms and
--- conditions of Section 2 of the Spine Editor License Agreement:
--- http://esotericsoftware.com/spine-editor-license
---
--- Otherwise, it is permitted to integrate the Spine Runtimes into software
--- or otherwise create derivative works of the Spine Runtimes (collectively,
--- "Products"), provided that each user of the Products must obtain their own
--- Spine Editor license and redistribution of the Products in any form must
--- include this license and copyright notice.
---
--- THIS SOFTWARE IS PROVIDED BY ESOTERIC SOFTWARE LLC "AS IS" AND ANY EXPRESS
--- OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
--- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
--- NO EVENT SHALL ESOTERIC SOFTWARE LLC BE LIABLE FOR ANY DIRECT, INDIRECT,
--- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
--- BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS
--- INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY
--- THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
--- NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
--- EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-- Spine Runtimes Software License v2.5
+-- 
+-- Copyright (c) 2013-2016, Esoteric Software
+-- All rights reserved.
+-- 
+-- You are granted a perpetual, non-exclusive, non-sublicensable, and
+-- non-transferable license to use, install, execute, and perform the Spine
+-- Runtimes software and derivative works solely for personal or internal
+-- use. Without the written permission of Esoteric Software (see Section 2 of
+-- the Spine Software License Agreement), you may not (a) modify, translate,
+-- adapt, or develop new applications using the Spine Runtimes or otherwise
+-- create derivative works or improvements of the Spine Runtimes or (b) remove,
+-- delete, alter, or obscure any trademarks or any copyright, trademark, patent,
+-- or other intellectual property or proprietary rights notices on or in the
+-- Software, including any copy thereof. Redistributions in binary or source
+-- form must include this license and terms.
+-- 
+-- THIS SOFTWARE IS PROVIDED BY ESOTERIC SOFTWARE "AS IS" AND ANY EXPRESS OR
+-- IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+-- MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+-- EVENT SHALL ESOTERIC SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+-- SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+-- PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, BUSINESS INTERRUPTION, OR LOSS OF
+-- USE, DATA, OR PROFITS) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+-- IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+-- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+-- POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------------------------
 
 local AttachmentType = require "spine-lua.attachments.AttachmentType"
@@ -58,35 +59,26 @@ function SkeletonBounds:update (skeleton, updateAabb)
 	self.polygons = polygons
 	local slots = skeleton.slots
 
-	for _,slot in ipairs(skeleton.slots) do
-		if (slot.bone.active) then
-			local attachment = slot.attachment
-			if attachment and attachment.type == AttachmentType.boundingbox then
-				local boundingBox = attachment
-				table_insert(boundingBoxes, boundingBox)
+	for i,slot in ipairs(skeleton.slots) do
+		local attachment = slot.attachment
+		if attachment and attachment.type == AttachmentType.boundingbox then
+			local boundingBox = attachment
+			table_insert(boundingBoxes, boundingBox)
 
-				local polygon = {}
-				table_insert(polygons, polygon)
+			local polygon = {}
+			table_insert(polygons, polygon)
 
-				boundingBox:computeWorldVertices(slot, 0, boundingBox.worldVerticesLength, polygon, 0, 2)
-			end
+			boundingBox:computeWorldVertices(slot, polygon)
 		end
 	end
 
-	if updateAabb then
-		self:aabbCompute()
-	else
-		self.minX = 9999999
-		self.minY = 9999999
-		self.maxX = -9999999
-		self.maxY = -9999999
-	end
+	if updateAabb then self:aabbCompute() end
 end
 
 function SkeletonBounds:aabbCompute ()
 	local minX, minY, maxX, maxY = 9999999, 9999999, -9999999, -9999999
 	local polygons = self.polygons
-	for _,vertices in ipairs(polygons) do
+	for i,vertices in ipairs(polygons) do
 		local count = #vertices
 		for ii = 1, count, 2 do
 			local x = vertices[ii]
@@ -180,7 +172,7 @@ function SkeletonBounds:polygonIntersectsSegment (polygon, x1, y1, x2, y2)
 end
 
 function SkeletonBounds:getPolygon (attachment)
-	local index = utils.indexOf(self.boundingBoxes, attachment)
+	local index = spine.utils.indexOf(self.boundingBoxes, attachment)
 	if index == -1 then
 		return nil
 	else

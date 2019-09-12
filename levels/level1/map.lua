@@ -5,8 +5,8 @@ local map = {
     {
         time = 0,
         folow_camera = false,
-        x = 234,
-        y = -28,
+        x = 171,
+        y = 140,
         animation = chiro.create({
             dir = 'anim/powerup',
             states = {
@@ -20,8 +20,8 @@ local map = {
     {
         time = 0,
         folow_camera = true,
-        x = 220,
-        y = -28,
+        x = 264,
+        y = 140,
         animation = chiro.create({
             dir = 'anim/powerup',
             states = {

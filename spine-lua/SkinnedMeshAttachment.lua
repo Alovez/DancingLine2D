@@ -30,14 +30,15 @@
 
 local AttachmentType = require "spine-lua.AttachmentType"
 
-local MeshAttachment = {}
-function MeshAttachment.new (name)
+local SkinnedMeshAttachment = {}
+function SkinnedMeshAttachment.new (name)
 	if not name then error("name cannot be nil", 2) end
-
+	
 	local self = {
 		name = name,
-		type = AttachmentType.mesh,
-		vertices = nil,
+		type = AttachmentType.skinnedmesh,
+		bones = nil,
+		weights = nil,
 		uvs = nil,
 		regionUVs = nil,
 		triangles = nil,
@@ -73,22 +74,58 @@ function MeshAttachment.new (name)
 	end
 
 	function self:computeWorldVertices (x, y, slot, worldVertices)
-		local bone = slot.bone
+		local skeletonBones = slot.bone.skeleton.bones
 x,y=slot.bone.skeleton.x,slot.bone.skeleton.y
-		x = x + bone.worldX
-		y = y + bone.worldY
-		local m00, m01, m10, m11 = bone.m00, bone.m01, bone.m10, bone.m11
-		local vertices = self.vertices
-		local verticesCount = #vertices
-		if slot.attachmentVertices and #slot.attachmentVertices == verticesCount then vertices = slot.attachmentVertices end
-		for i = 1, verticesCount, 2 do
-			local vx = vertices[i]
-			local vy = vertices[i + 1]
-			worldVertices[i] = vx * m00 + vy * m01 + x
-			worldVertices[i + 1] = vx * m10 + vy * m11 + y
+		local weights = self.weights
+		local bones = self.bones
+		local w, v, b, f = 1, 1, 1, 1
+		local n = #bones
+		local wx, wy, bone, vx, vy, weight
+		if slot.attachmentVerticesCount == 0 then
+			while v <= n do
+				wx = 0
+				wy = 0
+				local nn = bones[v] + v
+				v = v + 1
+				while v <= nn do
+					bone = skeletonBones[bones[v] + 1]
+					vx = weights[b]
+					vy = weights[b + 1]
+					weight = weights[b + 2]
+					wx = wx + (vx * bone.m00 + vy * bone.m01 + bone.worldX) * weight
+					wy = wy + (vx * bone.m10 + vy * bone.m11 + bone.worldY) * weight
+					v = v + 1
+					b = b + 3
+				end
+				worldVertices[w] = wx + x
+				worldVertices[w + 1] = wy + y
+				w = w + 2
+			end
+		else
+			local ffd = slot.attachmentVertices
+			while v <= n do
+				wx = 0
+				wy = 0
+				local nn = bones[v] + v
+				v = v + 1
+				while v <= nn do
+					bone = skeletonBones[bones[v] + 1]
+					vx = weights[b] + ffd[f]
+					vy = weights[b + 1] + ffd[f + 1]
+					weight = weights[b + 2]
+					wx = wx + (vx * bone.m00 + vy * bone.m01 + bone.worldX) * weight
+					wy = wy + (vx * bone.m10 + vy * bone.m11 + bone.worldY) * weight
+					v = v + 1
+					b = b + 3
+					f = f + 2
+				end
+				worldVertices[w] = wx + x
+				worldVertices[w + 1] = wy + y
+				w = w + 2
+			end
 		end
 	end
 
 	return self
 end
-return MeshAttachment
+return SkinnedMeshAttachment

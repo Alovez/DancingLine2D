@@ -21,6 +21,26 @@ local scene = {
         rotate = 0
     },
     {
+        enter = 0,
+        exit = 40,
+        x = 122,
+        y = 18,
+        ob = assets.texture("leaf1"),
+        scale_x = 0.5,
+        scale_y = 0.5,
+        rotate = 0
+    },
+    {
+        enter = 0,
+        exit = 40,
+        x = 150,
+        y = -10,
+        ob = assets.texture("leaf2"),
+        scale_x = 0.5,
+        scale_y = 0.5,
+        rotate = 0
+    },
+    {
         enter =  4.70833333333,
         exit = 100,
         x = 192,
@@ -50,6 +70,7 @@ local scene = {
         scale_y = 1,
         rotate = 0
     },
+
     {
         enter =  16.5416666667,
         exit = 100,
@@ -78,6 +99,16 @@ local scene = {
         ob = assets.texture("egg"),
         scale_x = 1,
         scale_y = 1,
+        rotate = 0
+    },
+    {
+        enter =  0,
+        exit = 40,
+        x = 260,
+        y = 217,
+        ob = assets.texture("grass1"),
+        scale_x = 0.5,
+        scale_y = 0.5,
         rotate = 0
     },
     {
