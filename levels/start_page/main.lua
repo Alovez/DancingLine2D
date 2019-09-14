@@ -18,6 +18,7 @@ function love.keypressed(key, scancode, isrepeat)
     if key == "escape" then
         love.event.quit()
     elseif key == "j" then
+        love.graphics.print("Loading...", 80, 60)
         state.switch("level1")
     end
 end

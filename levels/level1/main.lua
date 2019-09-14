@@ -14,7 +14,6 @@ local map = require("levels/level1/map")
 local rhythm = require("levels/level1/rhythm")
 local Player = require("levels/level1/player")
 local assets = require("assets")
-local state=require("stateswitcher")
 
 local bgm_index = 0;
 local orbit_index = 1;
@@ -267,7 +266,7 @@ function darw_notes()
         if v.status == 'idle' then
             if current_time > v.time - note_interval and current_time < v.time + note_interval then
                 math.randomseed(v.time)
-                love.graphics.draw(assets.texture("note"), v.x + 10, v.y - math.random(0, jump_height - 5) - 10, 0, 0.5, 0.5)
+                love.graphics.draw(assets.texture("note"), v.x + 10, v.y - math.random(0, jump_height - 10) - 10, 0, 0.5, 0.5)
             end
             break
         end
