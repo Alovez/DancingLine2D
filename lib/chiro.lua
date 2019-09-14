@@ -13,7 +13,6 @@ function chiro.create(config)
   local loader = function (path) return love.graphics.newImage(self.dir .. '/' .. path) end
   local atlas = spine.TextureAtlas.new(spine.utils.readFile(self.dir .. '/' .. name .. ".atlas"), loader)
 
-  print("tttttt")
   self.skeletonJson = spine.SkeletonJson.new(spine.TextureAtlasAttachmentLoader.new(atlas))
   self.skeletonJson.scale = self.scale or 1
 

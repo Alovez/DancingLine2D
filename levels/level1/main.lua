@@ -12,6 +12,7 @@ local orbit = require("levels/level1/orbit")
 local scene = require("levels/level1/scene")
 local map = require("levels/level1/map")
 local rhythm = require("levels/level1/rhythm")
+local Player = require("levels/level1/player")
 local assets = require("assets")
 local state=require("stateswitcher")
 
@@ -24,24 +25,30 @@ local pause = false
 local gameover = false
 local pause_page = 0
 local gameover_page = 0
+local gamepass_page = 0
 local cam = Camera(320, 240, { x = 0, y = 0, resizable = false, maintainAspectRatio = true });
 local life = 8
 local cambo = 0
 local current_key = 0
+local player = 0
+local hit_interval = 0.3;
+local note_interval = 0.5;
+local jump_height = 20;
+local game_pass = false;
 
 -- Event Call Back
 function hitted()
     local current_time = bgm:tell()
     for _, v in ipairs(rhythm) do
         if v.status == 'idle' then
-            if current_time > v.time - v.interval and current_time < v.time + v.interval then
+            if current_time > v.time - hit_interval and current_time < v.time + hit_interval then
                 cambo = cambo + 1
                 if cambo > 2 and life < 8 then
                     life = life + 1
                 end
                 v.status = 'success'
                 bgm:setVolume(1)
-            elseif current_time > v.time + v.interval then
+            elseif current_time > v.time + hit_interval then
                 v.status = 'false'
                 life = life - 1
                 cambo = 0
@@ -58,23 +65,28 @@ function love.keypressed(key, scancode, isrepeat)
     elseif key == "j" then
         dong:stop()
         dong:play()
-        if gameover then
-            print("gameover")
-            state.switch("start_page")
+        if gameover or game_pass then
+            love.load()
         end
         if not start then
             start = true
         else
             hitted()
-            print(bgm:tell())
+            player:jump(jump_height)
+            print("{time = "..bgm:tell()..",")
+            local cx, cy = cam:getTranslation()
+            print("x = "..(cx + 240)..", y = "..(cy + 180).."},")
         end
     elseif key == 'return' then
-        print("enter")
         if pause then
             pause = false
         else
             bgm_index = bgm:tell()
             pause = true
+        end
+    elseif key == 'k' then
+        if pause then
+            love.load()
         end
     elseif key == "rctrl" then
         love.audio.pause(bgm)
@@ -99,14 +111,23 @@ end
 
 
 function love.load()
+    -- init player
+    player = Player:new({}, 0, 0, 0.2, 0.2, 0.3)
+    life = 8
+    pause = false
+    gameover = false
+    start = false
+    bgm_index = 0;
     -- init Music
     assets.load_sounds("sounds")
     bgm = assets.sound("level1")("static");
+    bgm:stop()
     dong = assets.sound("dong")("static");
     -- init textures
     assets.load_textures("pic")
     pause_page = assets.texture("bg_pause")
     gameover_page = assets.texture("bg_gameover")
+    gamepass_page = assets.texture("bg_gamepass")
     -- init rhythm
     load_rhythm()
     -- init global var
@@ -120,11 +141,11 @@ function update_rhythm(current_time)
     for _, v in ipairs(rhythm) do
         if v.status == 'idle' and not breaked then
             breaked = true
-            if v.time + v.interval < current_time then
+            if v.time + hit_interval < current_time then
                 v.status = 'false'
                 life = life - 1
                 cambo = 0
-                bgm:setVolume(life / 8)
+                bgm:setVolume(0.3)
             end
         end
     end
@@ -161,22 +182,28 @@ function update_camera(current_time)
     end
 end
 
+
 function love.update(dt)
-    if start and not pause then
+    if start and not pause and not game_pass then
         local current_time = bgm:tell();
         update_camera(current_time)
+        local cx, cy = cam:getTranslation()
+        player:update(cx, cy, dt, current_time);
         update_rhythm(current_time)
         if not bgm:isPlaying() then
             love.audio.play(bgm)
             bgm:seek(bgm_index)
         end
         update_anims(current_time, dt)
+        if current_time >= 194.625 then
+            game_pass = true
+        end
     elseif pause then
         bgm:pause()
     end
---    if life <= 0 then
---        gameover = true
---    end
+    if life <= 0 then
+        gameover = true
+    end
 end
 
 -- Draw
@@ -215,6 +242,11 @@ function draw_gameover()
     love.graphics.draw(gameover_page, cx - 80, cy - 60);
 end
 
+function draw_pass()
+    local cx, cy = cam:getTranslation()
+    love.graphics.draw(gamepass_page, cx - 80, cy - 60);
+end
+
 function darw_anims()
     local cx, cy = cam:getTranslation()
     for _, value in ipairs(map)
@@ -229,15 +261,32 @@ function darw_anims()
     end
 end
 
+function darw_notes()
+    local current_time = bgm:tell();
+    for _, v in ipairs(rhythm) do
+        if v.status == 'idle' then
+            if current_time > v.time - note_interval and current_time < v.time + note_interval then
+                math.randomseed(v.time)
+                love.graphics.draw(assets.texture("note"), v.x + 10, v.y - math.random(0, jump_height - 5) - 10, 0, 0.5, 0.5)
+            end
+            break
+        end
+    end
+end
+
 function love.draw()
     cam:push()
     draw_bg()
     draw_scene()
-    if start and not pause then
+    if start and not pause and not game_pass then
         draw_board()
         darw_anims()
+        darw_notes()
+        player:draw()
     elseif pause then
         draw_pause()
+    elseif game_pass then
+        draw_pass()
     end
     if gameover then
         bgm:stop()
